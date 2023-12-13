@@ -32,6 +32,7 @@ public class APIStepDefs {
     @Given("Accept header is {string}")
     public void accept_header_is(String contentType) {
         givenPart.accept(contentType);
+
     }
     @When("I send GET request to {string} endpoint")
     public void i_send_get_request_to_endpoint(String endpoint) {
