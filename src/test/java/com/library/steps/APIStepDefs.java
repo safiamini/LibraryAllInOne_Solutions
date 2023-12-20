@@ -12,7 +12,9 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
@@ -103,23 +105,58 @@ public class APIStepDefs {
 
     @Given("Request Content Type header is {string}")
     public void request_content_type_header_is(String contentType) {
+        givenPart.contentType(contentType);
 
     }
     @Given("I create a random {string} as request body")
     public void i_create_a_random_as_request_body(String randomData) {
+        Map<String,Object> requestDataMap;
+
+
+        switch (randomData){
+            case "user":
+                requestDataMap=LibraryAPI_Util.getRandomUserMap();
+                break;
+            case "book":
+                requestDataMap=LibraryAPI_Util.getRandomBookMap();
+                break;
+            default:
+                throw new RuntimeException("Unexpected Value :"+randomData);
+        }
+        System.out.println("requestDataMap = " + requestDataMap);
+
+        /*
+
+        Since Content Type is x-application/x-www-form-urlencoded we should send body by using
+        formParam.Each requestDataMap has more than one value as key - value.That is why we used
+        into here formParams to send all data in one shot
+
+         */
+
+        givenPart.formParams(requestDataMap);
 
 
     }
+
+
     @When("I send POST request to {string} endpoint")
     public void i_send_post_request_to_endpoint(String endpoint) {
+
+         response = givenPart.when()
+                .post(ConfigurationReader.getProperty("library.baseUri") + endpoint)
+                .prettyPeek();
+
+        thenPart = response.then();
+
 
     }
     @Then("the field value for {string} path should be equal to {string}")
     public void the_field_value_for_path_should_be_equal_to(String path, String value) {
-
+        thenPart.body(path,is((value)));
     }
     @Then("{string} field should not be null")
     public void field_should_not_be_null(String path) {
+        thenPart.body(path,is(notNullValue()));
 
     }
 
