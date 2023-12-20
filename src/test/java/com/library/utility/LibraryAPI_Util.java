@@ -66,7 +66,7 @@ public class LibraryAPI_Util {
         Faker faker = new Faker() ;
         Map<String,Object> userMap = new LinkedHashMap<>();
         String fullName = faker.name().fullName();
-        String email=fullName.substring(0,fullName.indexOf(" "))+"@library";
+        String email=fullName.substring(0,fullName.indexOf(" "))+faker.number().numberBetween(100,200)+"@library";
         System.out.println(email);
         userMap.put("full_name", fullName );
         userMap.put("email", email);
