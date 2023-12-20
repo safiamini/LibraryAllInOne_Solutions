@@ -1,6 +1,9 @@
 package com.library.steps;
 
+import com.library.pages.BookPage;
+import com.library.utility.BrowserUtil;
 import com.library.utility.ConfigurationReader;
+import com.library.utility.DB_Util;
 import com.library.utility.LibraryAPI_Util;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -11,6 +14,7 @@ import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,6 +112,7 @@ public class APIStepDefs {
         givenPart.contentType(contentType);
 
     }
+    Map<String,Object> randomDataMap;
     @Given("I create a random {string} as request body")
     public void i_create_a_random_as_request_body(String randomData) {
         Map<String,Object> requestDataMap;
@@ -132,7 +137,7 @@ public class APIStepDefs {
         into here formParams to send all data in one shot
 
          */
-
+        randomDataMap=requestDataMap;
         givenPart.formParams(requestDataMap);
 
 
@@ -145,6 +150,10 @@ public class APIStepDefs {
          response = givenPart.when()
                 .post(ConfigurationReader.getProperty("library.baseUri") + endpoint)
                 .prettyPeek();
+
+
+
+
 
         thenPart = response.then();
 
@@ -168,6 +177,86 @@ public class APIStepDefs {
 
     @Then("UI, Database and API created book information must match")
     public void ui_database_and_api_created_book_information_must_match() {
+        String id = response.path("book_id");
+
+        // API DATA -> EXPECTED DATA
+        Response apiResponse = given().log().uri()
+                .header("x-library-token", LibraryAPI_Util.getToken("librarian"))
+                .pathParam("id", id)
+                .when().get(ConfigurationReader.getProperty("library.baseUri") + "/get_book_by_id/{id}")
+                .prettyPeek();
+
+        JsonPath jp = response.jsonPath();
+        System.out.println("------API DATA--------");
+        Map<String,Object> apiBook=new LinkedHashMap<>();
+        String name = jp.getString("name");
+        apiBook.put("name",name);
+        apiBook.put("isbn",jp.getString("isbn"));
+        apiBook.put("year",jp.getString("year"));
+        apiBook.put("author",jp.getString("author"));
+        apiBook.put("book_category_id",jp.getString("book_category_id"));
+        apiBook.put("description",jp.getString("description"));
+        System.out.println("apiBook Map= " + apiBook);
+
+
+        // DB DATA -> ACTUAL
+        DB_Util.runQuery("select * from books where id='"+id+"'");
+        Map<String, Object> dbBook = DB_Util.getRowMap(1);
+        System.out.println("------DB DATA--------");
+        dbBook.remove("id");
+        dbBook.remove("added_date");
+        System.out.println("dbBook Map= " + dbBook);
+
+
+        // UI DATA -> ACTUAL
+        /*
+            Normally to find book we can use ISBN but for this example we will use bookName to
+            find same book from UI. Also you should have bookName as unique to make your test case
+            successfully
+
+         */
+        // Get me bookName from API Request while POSTing bookName
+        String bookName = (String) randomDataMap.get("name");
+        System.out.println("bookName = " + bookName);
+
+        BookPage bookPage=new BookPage();
+        bookPage.search.sendKeys(bookName);
+        BrowserUtil.waitFor(3);
+
+        bookPage.editBook(bookName).click();
+        BrowserUtil.waitFor(3);
+
+        // Get the book that we created
+        Map<String,Object> uiBook=new LinkedHashMap<>();
+
+        String uiBookName = bookPage.bookName.getAttribute("value");
+        uiBook.put("name",uiBookName);
+
+        String uiISBN = bookPage.isbn.getAttribute("value");
+        uiBook.put("isbn", uiISBN);
+
+        String uiYear = bookPage.year.getAttribute("value");
+        uiBook.put("year",uiYear);
+
+        String uiAuthor = bookPage.author.getAttribute("value");
+        uiBook.put("author",uiAuthor);
+
+        // Get me category id
+        // We have category name into UI.To retrieve bookCategory ID we used category name with DB Query
+        // for finding related book_category_id
+        String selectedBookCategoryName = BrowserUtil.getSelectedOption(bookPage.categoryDropdown);
+        DB_Util.runQuery("select id from book_categories where name='"+selectedBookCategoryName+"'");
+        String uiCategoryID= DB_Util.getFirstRowFirstColumn();
+        uiBook.put("book_category_id",uiCategoryID);
+
+        String uiDesc = bookPage.description.getAttribute("value");
+        uiBook.put("description",uiDesc);
+        System.out.println("uiBook MAP= " + uiBook);
+
+        // Assertions
+        Assert.assertEquals(apiBook,uiBook);
+        Assert.assertEquals(apiBook,dbBook);
+
 
     }
 
