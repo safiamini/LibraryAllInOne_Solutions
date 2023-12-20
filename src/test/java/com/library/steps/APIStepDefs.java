@@ -186,7 +186,7 @@ public class APIStepDefs {
                 .when().get(ConfigurationReader.getProperty("library.baseUri") + "/get_book_by_id/{id}")
                 .prettyPeek();
 
-        JsonPath jp = response.jsonPath();
+        JsonPath jp = apiResponse.jsonPath();
         System.out.println("------API DATA--------");
         Map<String,Object> apiBook=new LinkedHashMap<>();
         String name = jp.getString("name");
@@ -227,6 +227,8 @@ public class APIStepDefs {
         BrowserUtil.waitFor(3);
 
         // Get the book that we created
+        System.out.println("------UI DATA--------");
+
         Map<String,Object> uiBook=new LinkedHashMap<>();
 
         String uiBookName = bookPage.bookName.getAttribute("value");

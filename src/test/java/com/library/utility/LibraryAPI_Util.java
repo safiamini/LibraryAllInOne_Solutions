@@ -50,7 +50,7 @@ public class LibraryAPI_Util {
 
         Faker faker = new Faker() ;
         Map<String,Object> bookMap = new LinkedHashMap<>();
-        String randomBookName = faker.book().title() + faker.number().numberBetween(0, 10);
+        String randomBookName = faker.funnyName().name() + faker.number().numberBetween(100, 200);
         bookMap.put("name", randomBookName);
         bookMap.put("isbn", faker.code().isbn10()   );
         bookMap.put("year", faker.number().numberBetween(1000,2021)   );
