@@ -12,6 +12,8 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 
+import java.util.List;
+
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
@@ -40,7 +42,7 @@ public class APIStepDefs {
                 .get(ConfigurationReader.getProperty("library.baseUri") + endpoint)
                 .prettyPeek();
 
-        thenPart = response.then();
+         thenPart = response.then();
     }
     @Then("status code should be {int}")
     public void status_code_should_be(Integer statusCode) {
@@ -60,5 +62,38 @@ public class APIStepDefs {
         // response or thenPart.extract().jsonPath();
 
     }
+
+
+    /**
+     * US02 RELATED
+     *
+     */
+
+    String id;
+    @Given("Path param {string} is {string}")
+    public void path_param_is(String pathParam, String value) {
+        givenPart.pathParam(pathParam,value);
+        id=value;
+
+    }
+    @Then("{string} field should be same with path param")
+    public void field_should_be_same_with_path_param(String path) {
+        thenPart.body(path,is(id));
+    }
+    @Then("following fields should not be null")
+    public void following_fields_should_not_be_null(List<String> paths) {
+        /*
+        thenPart.body(paths.get(0),is(notNullValue()))
+                .body(paths.get(1),is(notNullValue()))
+                .body(paths.get(1),is(notNullValue()));
+
+         */
+
+        for (String eachPath : paths) {
+            thenPart.body(eachPath,is(notNullValue()));
+        }
+
+    }
+
 
 }
