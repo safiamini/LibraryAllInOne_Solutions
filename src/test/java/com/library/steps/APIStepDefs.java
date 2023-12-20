@@ -161,5 +161,16 @@ public class APIStepDefs {
     }
 
 
+    /**
+     *  US 03 SC 2  RELATED
+     */
+
+
+    @Then("UI, Database and API created book information must match")
+    public void ui_database_and_api_created_book_information_must_match() {
+
+    }
+
+
 
 }
