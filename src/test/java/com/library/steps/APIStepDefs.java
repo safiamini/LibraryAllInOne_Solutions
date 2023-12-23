@@ -1,6 +1,7 @@
 package com.library.steps;
 
 import com.library.pages.BookPage;
+import com.library.pages.LoginPage;
 import com.library.utility.BrowserUtil;
 import com.library.utility.ConfigurationReader;
 import com.library.utility.DB_Util;
@@ -179,6 +180,7 @@ public class APIStepDefs {
     public void ui_database_and_api_created_book_information_must_match() {
         String id = response.path("book_id");
 
+        // You can use data from randomData too
         // API DATA -> EXPECTED DATA
         Response apiResponse = given().log().uri()
                 .header("x-library-token", LibraryAPI_Util.getToken("librarian"))
@@ -277,22 +279,40 @@ public class APIStepDefs {
         Map<String, Object> dbUser = DB_Util.getRowMap(1);
         System.out.println("dbUser = " + dbUser);
 
-
       // Compare against API Data
         System.out.println("--- API POST DATA ------");
         System.out.println(randomDataMap);
-        randomDataMap.remove("password");
+        String password= (String) randomDataMap.remove("password");
 
         Assert.assertEquals(randomDataMap,dbUser);
-
+        randomDataMap.put("password",password);
 
     }
+
     @Then("created user should be able to login Library UI")
     public void created_user_should_be_able_to_login_library_ui() {
 
+        LoginPage loginPage=new LoginPage();
+        String email = (String) randomDataMap.get("email");
+        System.out.println("email = " + email);
+        String password = (String) randomDataMap.get("password");
+        System.out.println("password = " + password);
+        loginPage.login(email,password);
+        BrowserUtil.waitFor(2);
+
     }
+
     @Then("created user name should appear in Dashboard Page")
     public void created_user_name_should_appear_in_dashboard_page() {
+
+        BookPage bookPage=new BookPage();
+        BrowserUtil.waitFor(2);
+
+        String uiFullName = bookPage.accountHolderName.getText();
+        String apiFullName = (String) randomDataMap.get("full_name");
+
+        Assert.assertEquals(apiFullName,uiFullName);
+
 
     }
 
