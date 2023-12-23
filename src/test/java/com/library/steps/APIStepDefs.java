@@ -262,6 +262,35 @@ public class APIStepDefs {
 
     }
 
+    /**
+     *  US 04 RELATED
+     */
+
+    @Then("created user information should match with Database")
+    public void created_user_information_should_match_with_database() {
+      // Get me user_id
+        String user_id=response.path("user_id");
+        System.out.println("User is generated with "+ user_id);
+
+      // Database Data  --> user_id
+        DB_Util.runQuery("select * from users where id="+user_id);
+        Map<String, Object> dbUser = DB_Util.getRowMap(1);
+        System.out.println("dbUser = " + dbUser);
+
+
+      // Compare against API Data
+
+
+
+    }
+    @Then("created user should be able to login Library UI")
+    public void created_user_should_be_able_to_login_library_ui() {
+
+    }
+    @Then("created user name should appear in Dashboard Page")
+    public void created_user_name_should_appear_in_dashboard_page() {
+
+    }
 
 
 }
