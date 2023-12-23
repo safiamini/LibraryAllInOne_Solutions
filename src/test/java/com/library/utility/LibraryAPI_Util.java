@@ -72,7 +72,7 @@ public class LibraryAPI_Util {
         userMap.put("email", email);
         userMap.put("password", "libraryUser");
         // 2 is librarian as role
-        userMap.put("user_group_id",2);
+        userMap.put("user_group_id","2");
         userMap.put("status", "ACTIVE");
         userMap.put("start_date", "2023-03-11");
         userMap.put("end_date", "2024-03-11");

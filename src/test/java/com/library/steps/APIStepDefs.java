@@ -273,13 +273,17 @@ public class APIStepDefs {
         System.out.println("User is generated with "+ user_id);
 
       // Database Data  --> user_id
-        DB_Util.runQuery("select * from users where id="+user_id);
+        DB_Util.runQuery("select full_name,email,user_group_id,status,start_date,end_date,address from users where id="+user_id);
         Map<String, Object> dbUser = DB_Util.getRowMap(1);
         System.out.println("dbUser = " + dbUser);
 
 
       // Compare against API Data
+        System.out.println("--- API POST DATA ------");
+        System.out.println(randomDataMap);
+        randomDataMap.remove("password");
 
+        Assert.assertEquals(randomDataMap,dbUser);
 
 
     }
