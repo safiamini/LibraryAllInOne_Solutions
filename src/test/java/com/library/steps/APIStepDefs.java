@@ -59,7 +59,6 @@ public class APIStepDefs {
     @Then("Response Content type is {string}")
     public void response_content_type_is(String contentType) {
         thenPart.contentType(contentType);
-
     }
     @Then("Each {string} field should not be null")
     public void each_field_should_not_be_null(String path) {
@@ -319,13 +318,15 @@ public class APIStepDefs {
     /**
      * US 05
      */
+    String token;
     @Given("I logged Library api with credentials {string} and {string}")
     public void i_logged_library_api_with_credentials_and(String email, String password) {
-
+        token = LibraryAPI_Util.getToken(email, password);
+        givenPart = given().log().uri();
     }
     @Given("I send token information as request body")
     public void i_send_token_information_as_request_body() {
-
+        givenPart.formParam("token",token);
     }
 
 
