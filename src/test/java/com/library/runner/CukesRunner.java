@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
         },
         features = "src/test/resources/features" ,
         glue = "com/library/steps",
-            publish = true
+        publish = true
 )
 public class CukesRunner {
 
